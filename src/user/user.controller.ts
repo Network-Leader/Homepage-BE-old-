@@ -7,6 +7,11 @@ import {
   Param,
   BadRequestException,
   UseGuards,
+  Delete,
+  Request,
+  HttpCode,
+  HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, CreateUserResponse } from './dto/create-user.dto';
@@ -15,12 +20,14 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtCheckGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { User } from './entities/user.entity';
 
 @ApiTags('User')
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -42,8 +49,9 @@ export class UserController {
     description: 'Email duplicated.',
     type: BadRequestException,
   })
-  @ApiBearerAuth()
-  @UseGuards(JwtCheckGuard)
+  // @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard) // admin으로 바꿀 것
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(
     @Body() createUserDto: CreateUserDto,
@@ -51,18 +59,35 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @ApiOkResponse({
+    description: "성공적으로 자신의 정보를 반환",
+    type: User,
+  })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async findMe(@Request() req) {
+    return req.user;
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get()
-  async findAll() {
+  async findAll(@Query() q) {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @Get(':user_id')
+  async findOne(@Param('user_id') id: string) {
     return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Patch(':user_id')
+  async update(@Param('user_id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @Delete(':user_id')
+  async remove(@Param('user_id') id: string){
+    return this.userService.remove(id);
   }
 }

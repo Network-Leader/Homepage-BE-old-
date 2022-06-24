@@ -43,14 +43,13 @@ export class AuthController {
    */
   @ApiBody({ type: CreateTokenDto })
   @ApiOkResponse({
-    description: 'Login successfully.',
+    description: 'access token과 refresh token을 JWT 형식으로 전달합니다.',
     type: CreateTokenResponse,
   })
-  @ApiBearerAuth()
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Request() req) {
+  async login(@Request() req): Promise<CreateTokenResponse> {
     return this.authService.login(req.user);
   }
 
@@ -62,10 +61,9 @@ export class AuthController {
    */
   @ApiBody({ type: RefreshTokenDto })
   @ApiOkResponse({
-    description: 'Refresh access token successfully.',
+    description: 'refresh 토큰으로 새 JWT 토큰을 발행받습니다.',
     type: CreateTokenResponse,
   })
-  @ApiBearerAuth()
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
@@ -80,53 +78,12 @@ export class AuthController {
    */
   @ApiBody({ type: RefreshTokenDto })
   @ApiNoContentResponse({
-    description: 'Logout successfully.',
+    description: '성공적으로 로그아웃되었습니다.',
   })
-  @ApiBearerAuth()
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
   async logout(@Request() req) {
     return this.authService.logout(req.user);
-  }
-
-  /*
-   * Send Authorization Email
-   *
-   * api request body의 email로 인증코드를 담은 메일을 전송한다.
-   * 인증 코드는 랜덤하게 생성되며, 3분의 TTL을 가지고 로컬 저장소에 저장된다.
-   * 모종의 이유로 이메일이 전달되지 않을 경우 400 에러를 전송한다.
-   */
-  @ApiBody({ type: AuthMailDto })
-  @ApiNoContentResponse({
-    description: 'Send mail successfully.',
-  })
-  @ApiBadRequestResponse({
-    description: 'Email not sent.',
-    type: BadRequestException,
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('/send-auth-mail')
-  async sendAuthorizationEmail(@Body() authMailDto: AuthMailDto) {
-    return this.authService.sendAuthorizationEmail(authMailDto);
-  }
-
-  /*
-   * Check Authorization Code
-   *
-   * api request body의 이메일과 인증코드를 로컬 저장소에서 검사한다.
-   * 이메일과 인증코드가 일치하면 인증코드를 삭제하고 토큰을 발급한다.
-   * 인증코드는 3분의 TTL이 설정되어 있다.
-   * 토큰은 POST /user 로 요청을 보낼 때 Authorization 헤더에 Bearer 토큰을 전달한다.
-   */
-  @ApiBody({ type: AuthCodeDto })
-  @ApiOkResponse({
-    description: 'Validate auth code successfully.',
-    type: AuthCodeResponse,
-  })
-  @HttpCode(HttpStatus.OK)
-  @Post('/check-auth-code')
-  async checkAuthorizationCode(@Body() authCodeDto: AuthCodeDto) {
-    return this.authService.checkAuthorizationCode(authCodeDto);
   }
 }

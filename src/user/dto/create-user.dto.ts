@@ -2,24 +2,30 @@ import { IsString, IsEmail, IsBoolean, IsArray } from 'class-validator';
 import { CreateTokenResponse } from 'src/auth/dto/create-token.dto';
 
 export class CreateUserDto {
-  @IsString()
-  id:	string
-  @IsString()
-  student_id:	string
   @IsString()  
+  student_id:	string
+
+  @IsString()
+  password: string
+
+  @IsString()
   name:	string
+
   @IsString()
-  image_uri: string
+  image_uri:	string
+
   @IsString()
-  phone: string
-  @IsString()
-  email: string
+  phone:	string
+
+  @IsEmail()
+  email:	string
+
   @IsString()
   github:	string
-  @IsArray()
-  position:	[]
+
   @IsString()
   birthday: string
+
   @IsBoolean()
   admin: boolean
 }
@@ -27,6 +33,8 @@ export class CreateUserDto {
 export class CreateUser {
   id:	string
 
+  password: string
+
   student_id:	string
 
   name:	string
@@ -39,7 +47,7 @@ export class CreateUser {
 
   github:	string
 
-  position:	[]
+  position:	Array<string>
 
   birthday: string
 

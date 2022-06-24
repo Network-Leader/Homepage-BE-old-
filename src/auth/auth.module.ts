@@ -6,7 +6,6 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import {
-  JwtCheckStrategy,
   JwtStrategy,
   RefreshJwtStrategy,
 } from './strategies/jwt.strategy';
@@ -33,7 +32,6 @@ import { ConfigService } from '@nestjs/config';
     AuthRepository,
     LocalStrategy,
     JwtStrategy,
-    JwtCheckStrategy,
     RefreshJwtStrategy,
   ],
   controllers: [AuthController],

@@ -1,8 +1,8 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateTokenDto {
-  @IsEmail()
-  email: string;
+  @IsString()
+  student_id: string;
 
   @IsString()
   password: string;
