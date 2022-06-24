@@ -1,48 +1,58 @@
-import { IsString, IsEmail } from 'class-validator';
+import { IsString, IsEmail, IsBoolean, IsArray } from 'class-validator';
 import { CreateTokenResponse } from 'src/auth/dto/create-token.dto';
 
 export class CreateUserDto {
-  @IsString()
-  first_name: string;
+  @IsString()  
+  student_id:	string
 
   @IsString()
-  last_name: string;
+  password: string
+
+  @IsString()
+  name:	string
+
+  @IsString()
+  image_uri:	string
+
+  @IsString()
+  phone:	string
 
   @IsEmail()
-  email: string;
+  email:	string
 
   @IsString()
-  password: string;
+  github:	string
 
   @IsString()
-  phone: string;
+  birthday: string
 
-  @IsString()
-  address: string;
-
-  @IsString()
-  city: string;
-
-  @IsString()
-  gender: string;
+  @IsBoolean()
+  admin: boolean
 }
 
 export class CreateUser {
-  _id: string;
+  id:	string
 
-  first_name: string;
+  password: string
 
-  last_name: string;
+  student_id:	string
 
-  email: string;
+  name:	string
 
-  phone: string;
+  image_uri: string
 
-  address: string;
+  phone: string
 
-  city: string;
+  email: string
 
-  gender: string;
+  github:	string
+
+  position:	Array<string>
+
+  birthday: string
+
+  admin: boolean
+ 
 }
 
 export class CreateUserResponse {
