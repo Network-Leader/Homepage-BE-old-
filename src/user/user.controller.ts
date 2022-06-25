@@ -76,16 +76,20 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @HttpCode(HttpStatus.OK)
   @Get(':user_id')
   async findOne(@Param('user_id') id: string) {
     return this.userService.findOne(id);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Patch(':user_id')
   async update(@Param('user_id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':user_id')
   async remove(@Param('user_id') id: string){
     return this.userService.remove(id);
