@@ -7,6 +7,7 @@ import {
   HttpCode,
   Body,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -19,9 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
-  AuthCodeDto,
   AuthCodeResponse,
-  AuthMailDto,
+  UserAuthCodeDto,
+  UserAuthMailDto,
 } from './dto/auth-mail.dto';
 import {
   CreateTokenDto,
@@ -85,5 +86,34 @@ export class AuthController {
   @Post('logout')
   async logout(@Request() req) {
     return this.authService.logout(req.user);
+  }
+
+  @ApiBody({ type: UserAuthMailDto })
+  @ApiNoContentResponse({
+    description: 'Send mail successfully.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Email not sent.',
+    type: BadRequestException,
+  })
+  @ApiBadRequestResponse({
+    description: 'Email duplicated.',
+    type: ConflictException,
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('/send-code')
+  async sendAuthorizationEmail(@Body() authMailDto: UserAuthMailDto) {
+    return this.authService.sendAuthorizationEmail(authMailDto);
+  }
+
+  @ApiBody({ type: UserAuthCodeDto })
+  @ApiOkResponse({
+    description: 'Validate auth code successfully.',
+    type: AuthCodeResponse,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post('/check-code')
+  async checkAuthorizationCode(@Body() authCodeDto: UserAuthCodeDto) {
+    return this.authService.checkAuthorizationCode(authCodeDto);
   }
 }

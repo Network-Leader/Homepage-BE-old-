@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import {
   JwtStrategy,
   RefreshJwtStrategy,
+  JwtCheckStrategy,
 } from './strategies/jwt.strategy';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
@@ -33,6 +34,7 @@ import { ConfigService } from '@nestjs/config';
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
+    JwtCheckStrategy,
   ],
   controllers: [AuthController],
   exports: [AuthService],
