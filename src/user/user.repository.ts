@@ -32,11 +32,12 @@ export class UserRepository {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     return this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true }).lean()
+      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .lean()
       .exec();
   }
 
   async remove(id: string): Promise<any> {
-    return this.userModel.findByIdAndRemove({_id: id}).lean().exec();
+    return this.userModel.findByIdAndRemove({ _id: id }).lean().exec();
   }
 }

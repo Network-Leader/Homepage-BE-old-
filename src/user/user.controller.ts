@@ -11,6 +11,8 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  ConflictException,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, CreateUserResponse } from './dto/create-user.dto';
@@ -48,20 +50,26 @@ export class UserController {
     description: 'Email duplicated.',
     type: BadRequestException,
   })
+  @ApiBadRequestResponse({
+    description: 'Existed StudentID.',
+    type: ConflictException,
+  })
   @ApiBearerAuth()
   @UseGuards(JwtCheckGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(
     @Body() createUserDto: CreateUserDto,
+    @Req() req,
   ): Promise<CreateUserResponse> {
-    return this.userService.create(createUserDto);
+    return this.userService.create(createUserDto, req.user.email);
   }
 
   @ApiOkResponse({
     description: '성공적으로 자신의 정보를 반환',
     type: User,
   })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('me')
@@ -81,6 +89,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @Patch(':user_id')
@@ -91,6 +100,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':user_id')
   async remove(@Param('user_id') id: string): Promise<void> {

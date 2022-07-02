@@ -5,39 +5,35 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-
-  @Prop({ required: false })
-  id:	string
+  @Prop({ required: true })
+  student_id: string;
 
   @Prop({ required: true })
-  student_id:	string
-
-  @Prop({ required: true})
-  password: string
-
-  @Prop({ required: true }) 
-  name:	string
+  password: string;
 
   @Prop({ required: true })
-  image_uri: string
+  name: string;
 
   @Prop({ required: true })
-  phone: string
+  image_uri: string;
 
   @Prop({ required: true })
-  email: string
+  phone: string;
 
   @Prop({ required: true })
-  github:	string
+  email: string;
 
   @Prop({ required: true })
-  position:	Array<string>
+  github: string;
 
   @Prop({ required: true })
-  birthday: string
+  position: Array<string>;
 
-  @Prop({required: true})
-  admin: boolean
+  @Prop({ required: true })
+  birthday: string;
+
+  @Prop({ required: true })
+  admin: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

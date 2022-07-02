@@ -20,12 +20,18 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<CreateUserResponse> {
+  async create(
+    createUserDto: CreateUserDto,
+    email: string,
+  ): Promise<CreateUserResponse> {
     const existedUser = await this.userRepository.findByStudentID(
       createUserDto.student_id,
     );
     if (existedUser) {
       throw new ConflictException();
+    }
+    if (createUserDto.email !== email) {
+      throw new BadRequestException();
     }
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,

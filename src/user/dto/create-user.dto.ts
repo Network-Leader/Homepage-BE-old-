@@ -31,10 +31,6 @@ export class CreateUserDto {
 }
 
 export class CreateUser {
-  id: string;
-
-  password: string;
-
   student_id: string;
 
   name: string;
