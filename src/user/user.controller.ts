@@ -11,7 +11,6 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, CreateUserResponse } from './dto/create-user.dto';
@@ -23,7 +22,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard, JwtCheckGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from './entities/user.entity';
 
 @ApiTags('User')
@@ -49,8 +48,8 @@ export class UserController {
     description: 'Email duplicated.',
     type: BadRequestException,
   })
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard) // admin으로 바꿀 것
+  @ApiBearerAuth()
+  @UseGuards(JwtCheckGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(
@@ -60,38 +59,41 @@ export class UserController {
   }
 
   @ApiOkResponse({
-    description: "성공적으로 자신의 정보를 반환",
+    description: '성공적으로 자신의 정보를 반환',
     type: User,
   })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('me')
-  async findMe(@Request() req) {
-    return req.user;
+  async findMe(@Request() req): Promise<User> {
+    return req.user; //del도 가능인가?
   }
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async findAll(@Query() q) {
+  async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':user_id')
-  async findOne(@Param('user_id') id: string) {
+  async findOne(@Param('user_id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @Patch(':user_id')
-  async update(@Param('user_id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('user_id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
     return this.userService.update(id, updateUserDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':user_id')
-  async remove(@Param('user_id') id: string){
+  async remove(@Param('user_id') id: string): Promise<void> {
     return this.userService.remove(id);
   }
 }
