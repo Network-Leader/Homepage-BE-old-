@@ -26,11 +26,18 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard, JwtCheckGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from './entities/user.entity';
+import { CheckPolicies } from 'src/casl/policy';
+import { AppAbility, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { Action } from 'src/casl/action.enum';
+import { PoliciesGuard } from '../auth/guards/policy.guard';
 
 @ApiTags('User')
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
+  ) {}
 
   /*
    * Create a User
@@ -92,10 +99,19 @@ export class UserController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility, req: any) => {
+    const user = new User();
+    return ability.can(Action.Update, {
+      ...new User(),
+      student_id: req.params.user_id,
+    });
+  })
   @Patch(':user_id')
   async update(
     @Param('user_id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @Req() req,
   ): Promise<User> {
     return this.userService.update(id, updateUserDto);
   }
