@@ -10,7 +10,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
-import internal from 'stream';
 
 @Injectable()
 export class UserService {

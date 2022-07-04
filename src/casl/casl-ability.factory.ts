@@ -27,6 +27,9 @@ export class CaslAbilityFactory {
     }
     can(Action.Update, User, { student_id: user.student_id });
     can(Action.Delete, User, { student_id: user.student_id });
+    if (!user.admin) {
+      cannot(Action.Update, User, ['role']);
+    }
 
     return build({
       detectSubjectType: (item) =>

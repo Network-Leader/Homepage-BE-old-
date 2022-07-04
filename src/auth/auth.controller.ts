@@ -8,11 +8,12 @@ import {
   Body,
   BadRequestException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
@@ -31,6 +32,7 @@ import {
 } from './dto/create-token.dto';
 import { RefreshJwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -65,6 +67,10 @@ export class AuthController {
     description: 'refresh 토큰으로 새 JWT 토큰을 발행받습니다.',
     type: CreateTokenResponse,
   })
+  @ApiUnauthorizedResponse({
+    description: '존재하지 않는 유저입니다',
+    type: UnauthorizedException,
+  })
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
@@ -81,6 +87,10 @@ export class AuthController {
   @ApiNoContentResponse({
     description: '성공적으로 로그아웃되었습니다.',
   })
+  @ApiUnauthorizedResponse({
+    description: '존재하지 않는 유저입니다',
+    type: UnauthorizedException,
+  })
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('logout')
@@ -96,7 +106,7 @@ export class AuthController {
     description: 'Email not sent.',
     type: BadRequestException,
   })
-  @ApiBadRequestResponse({
+  @ApiConflictResponse({
     description: 'Email duplicated.',
     type: ConflictException,
   })
@@ -110,6 +120,11 @@ export class AuthController {
   @ApiOkResponse({
     description: 'Validate auth code successfully.',
     type: AuthCodeResponse,
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      '알맞지 않은 코드를 입력했거나 기존 작성한 이메일과 일치하지 않습니다',
+    type: UnauthorizedException,
   })
   @HttpCode(HttpStatus.OK)
   @Post('/check-code')

@@ -29,7 +29,9 @@ import { User } from './entities/user.entity';
 import { CheckPolicies } from 'src/casl/policy';
 import { AppAbility, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { Action } from 'src/casl/action.enum';
-import { PoliciesGuard } from '../auth/guards/policy.guard';
+import { PoliciesGuard } from '../casl/policy.guard';
+import { Roles } from 'src/auth/decorator/Roles.decorator';
+import { Role } from 'src/auth/types/role.enum';
 
 @ApiTags('User')
 @Controller('users')
@@ -84,12 +86,20 @@ export class UserController {
     return req.user; //del도 가능인가?
   }
 
+  @Roles(Role.GRADUATE)
+  @Roles(Role.UNDERGRADUATE)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
+  @Roles(Role.GRADUATE)
+  @Roles(Role.UNDERGRADUATE)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get(':user_id')
   async findOne(@Param('user_id') id: string): Promise<User> {
@@ -98,26 +108,37 @@ export class UserController {
 
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility, req: any) => {
     const user = new User();
     return ability.can(Action.Update, {
-      ...new User(),
+      ...user,
       student_id: req.params.user_id,
     });
   })
+  @CheckPolicies((ability: AppAbility, req: any) => {
+    const user = new User();
+    return ability.cannot(Action.Update, user);
+  })
+  @UseGuards(JwtAuthGuard)
   @Patch(':user_id')
   async update(
     @Param('user_id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @Req() req,
   ): Promise<User> {
     return this.userService.update(id, updateUserDto);
   }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility, req: any) => {
+    const user = new User();
+    return ability.can(Action.Delete, {
+      ...user,
+      student_id: req.params.user_id,
+    });
+  })
   @Delete(':user_id')
   async remove(@Param('user_id') id: string): Promise<void> {
     return this.userService.remove(id);
