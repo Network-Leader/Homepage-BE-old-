@@ -13,6 +13,7 @@ import {
   HttpStatus,
   ConflictException,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, CreateUserResponse } from './dto/create-user.dto';
@@ -20,9 +21,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard, JwtCheckGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from './entities/user.entity';
@@ -55,11 +58,11 @@ export class UserController {
     description: 'The record has been successfully created.',
     type: CreateUserResponse,
   })
-  @ApiBadRequestResponse({
-    description: 'Email duplicated.',
-    type: BadRequestException,
+  @ApiUnauthorizedResponse({
+    description: '입력 받은 이메일과 인증 받은 이메일이 다릅니다',
+    type: UnauthorizedException,
   })
-  @ApiBadRequestResponse({
+  @ApiConflictResponse({
     description: 'Existed StudentID.',
     type: ConflictException,
   })
@@ -109,17 +112,17 @@ export class UserController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility, req: any) => {
-    const user = new User();
-    return ability.can(Action.Update, {
-      ...user,
-      student_id: req.params.user_id,
-    });
-  })
-  @CheckPolicies((ability: AppAbility, req: any) => {
-    const user = new User();
-    return ability.cannot(Action.Update, user);
-  })
+  // @CheckPolicies((ability: AppAbility, req: any) => {
+  //   const user = new User();
+  //   return ability.can(Action.Update, {
+  //     ...user,
+  //     student_id: req.params.user_id,
+  //   });
+  // })
+  // @CheckPolicies((ability: AppAbility, req: any) => {
+  //   const user = new User();
+  //   return ability.cannot(Action.Update, user);
+  // })
   @UseGuards(JwtAuthGuard)
   @Patch(':user_id')
   async update(

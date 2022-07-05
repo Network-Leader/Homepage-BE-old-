@@ -25,11 +25,13 @@ export class CaslAbilityFactory {
     } else {
       can(Action.Read, 'all'); // read-only access to everything
     }
+
     can(Action.Update, User, { student_id: user.student_id });
     can(Action.Delete, User, { student_id: user.student_id });
-    if (!user.admin) {
-      cannot(Action.Update, User, ['role']);
-    }
+
+    // if (!user.admin) {
+    //   cannot(Action.Update, User, ['role']);
+    // }
 
     return build({
       detectSubjectType: (item) =>
