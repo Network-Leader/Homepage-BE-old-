@@ -15,7 +15,7 @@ export class ModifyByIdInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    const id = request.params.id;
+    const id = request.params.user_id;
     const entity = await this.userRepository.findOne(id);
     request.entity = entity;
     return next.handle();

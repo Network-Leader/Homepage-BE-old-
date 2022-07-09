@@ -1,5 +1,6 @@
 import { IsString, IsEmail } from 'class-validator';
 import { CreateTokenResponse } from 'src/auth/dto/create-token.dto';
+import { Role } from 'src/auth/types/role.enum';
 import { User } from '../entities/user.entity';
 
 export class CreateUserDto {

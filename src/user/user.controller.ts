@@ -33,7 +33,6 @@ import { User } from './entities/user.entity';
 import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { Roles } from 'src/auth/decorator/Roles.decorator';
 import { Role } from 'src/auth/types/role.enum';
-import { Action } from 'src/casl/action.enum';
 
 @ApiTags('User')
 @Controller('users')
@@ -114,20 +113,23 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: any,
   ): Promise<User> {
-    console.log(req.entity);
-    const ability = this.caslAbilityFactory.createForEntity();
-    if (!ability.can(Action.Modify, req.user, req.entity)) {
+    const ability = this.caslAbilityFactory.createForUser();
+    if (
+      !ability.checkUserId(req.user, req.entity) ||
+      ability.checkAdminModifyRole(req.user, updateUserDto)
+    ) {
       throw new ForbiddenException();
     }
     return this.userService.update(id, updateUserDto);
   }
+
   @UseInterceptors(ModifyByIdInterceptor)
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':user_id')
   async remove(@Param('user_id') id: string, @Req() req: any): Promise<void> {
-    const ability = this.caslAbilityFactory.createForEntity();
-    if (!ability.can(Action.Modify, req.user, req.entity)) {
+    const ability = this.caslAbilityFactory.createForUser();
+    if (!ability.checkUserId(req.user, req.entity)) {
       throw new ForbiddenException();
     }
     return this.userService.remove(id);

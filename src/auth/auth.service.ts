@@ -114,7 +114,7 @@ export class AuthService {
   ): Promise<AuthCodeResponse> {
     const authCode = await this.authRepository.find(userAuthCodeDto.email);
     if (!authCode || userAuthCodeDto.code !== authCode) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     await this.authRepository.delete(userAuthCodeDto.email);
     return {

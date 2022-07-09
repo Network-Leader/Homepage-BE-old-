@@ -1,15 +1,17 @@
+import { UpdateUserDto } from './../user/dto/update-user.dto';
 import { Injectable } from '@nestjs/common';
-import { Action } from './action.enum';
-class EntityPolicy {
-  can(action: Action.Modify, user: any, resource: any): boolean {
-    //console.log(user);
-    //console.log(resource);
-    return user.id.toString() === resource.id.toString();
+import { User } from 'src/user/entities/user.entity';
+class UserPolicy {
+  checkUserId(user: User, resource: User): boolean {
+    return user.id === resource.id;
+  }
+  checkAdminModifyRole(user: User, dto: UpdateUserDto): boolean {
+    return !dto.role || user.admin;
   }
 }
 @Injectable()
 export class CaslAbilityFactory {
-  createForEntity(): EntityPolicy {
-    return new EntityPolicy();
+  createForUser(): UserPolicy {
+    return new UserPolicy();
   }
 }
