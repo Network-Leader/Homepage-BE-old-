@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 import { Role } from 'src/auth/types/role.enum';
 
