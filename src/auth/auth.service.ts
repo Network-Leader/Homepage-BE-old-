@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -57,7 +56,7 @@ export class AuthService {
 
   async login(user: any): Promise<CreateTokenResponse> {
     const uuid = uuid4();
-    const payload = { uuid, sub: user._id };
+    const payload = { uuid, sub: user.id };
     const access_token = this.jwtService.sign(payload);
     const expiresIn = parseInt(
       this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),

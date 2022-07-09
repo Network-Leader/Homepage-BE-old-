@@ -1,10 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { Role } from 'src/auth/types/role.enum';
 
 export type UserDocument = User & Document;
 
 @Schema()
 export class User {
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  id: string;
+
   @Prop({ required: true })
   student_id: string;
 
@@ -14,7 +22,7 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: 'string' })
   image_uri: string;
 
   @Prop({ required: true })
@@ -32,7 +40,10 @@ export class User {
   @Prop({ required: true })
   birthday: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Role.PENDING })
+  role: Role;
+
+  @Prop({ required: true, default: false })
   admin: boolean;
 }
 

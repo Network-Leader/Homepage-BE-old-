@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
@@ -10,7 +10,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
-import internal from 'stream';
 
 @Injectable()
 export class UserService {
@@ -31,7 +30,7 @@ export class UserService {
       throw new ConflictException();
     }
     if (createUserDto.email !== email) {
-      throw new BadRequestException();
+      throw new UnauthorizedException();
     }
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,

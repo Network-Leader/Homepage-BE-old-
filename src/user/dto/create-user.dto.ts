@@ -1,5 +1,6 @@
-import { IsString, IsEmail, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsEmail } from 'class-validator';
 import { CreateTokenResponse } from 'src/auth/dto/create-token.dto';
+import { User } from '../entities/user.entity';
 
 export class CreateUserDto {
   @IsString()
@@ -12,9 +13,6 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  image_uri: string;
-
-  @IsString()
   phone: string;
 
   @IsEmail()
@@ -25,33 +23,10 @@ export class CreateUserDto {
 
   @IsString()
   birthday: string;
-
-  @IsBoolean()
-  admin: boolean;
-}
-
-export class CreateUser {
-  student_id: string;
-
-  name: string;
-
-  image_uri: string;
-
-  phone: string;
-
-  email: string;
-
-  github: string;
-
-  position: Array<string>;
-
-  birthday: string;
-
-  admin: boolean;
 }
 
 export class CreateUserResponse {
-  user: CreateUser;
+  user: User;
 
   token: CreateTokenResponse;
 }

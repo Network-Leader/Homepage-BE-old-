@@ -5,6 +5,7 @@ import { UserController } from './user.controller';
 import { User, UserSchema } from './entities/user.entity';
 import { UserRepository } from './user.repository';
 import { AuthModule } from 'src/auth/auth.module';
+import { CaslModule } from 'src/casl/casl.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthModule } from 'src/auth/auth.module';
         },
       },
     ]),
+    CaslModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],

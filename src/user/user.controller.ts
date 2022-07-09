@@ -1,3 +1,4 @@
+import { ModifyByIdInterceptor } from './../common/interceptor/modifyById.interceptor';
 import {
   Controller,
   Get,
@@ -5,7 +6,6 @@ import {
   Body,
   Patch,
   Param,
-  BadRequestException,
   UseGuards,
   Delete,
   Request,
@@ -13,24 +13,35 @@ import {
   HttpStatus,
   ConflictException,
   Req,
+  UnauthorizedException,
+  ForbiddenException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, CreateUserResponse } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard, JwtCheckGuard } from 'src/auth/guards/jwt-auth.guard';
 import { User } from './entities/user.entity';
+import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { Roles } from 'src/auth/decorator/Roles.decorator';
+import { Role } from 'src/auth/types/role.enum';
+import { Action } from 'src/casl/action.enum';
 
 @ApiTags('User')
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
+  ) {}
 
   /*
    * Create a User
@@ -46,11 +57,11 @@ export class UserController {
     description: 'The record has been successfully created.',
     type: CreateUserResponse,
   })
-  @ApiBadRequestResponse({
-    description: 'Email duplicated.',
-    type: BadRequestException,
+  @ApiUnauthorizedResponse({
+    description: '입력 받은 이메일과 인증 받은 이메일이 다릅니다',
+    type: UnauthorizedException,
   })
-  @ApiBadRequestResponse({
+  @ApiConflictResponse({
     description: 'Existed StudentID.',
     type: ConflictException,
   })
@@ -77,18 +88,23 @@ export class UserController {
     return req.user; //del도 가능인가?
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get(':user_id')
   async findOne(@Param('user_id') id: string): Promise<User> {
     return this.userService.findOne(id);
   }
 
+  @UseInterceptors(ModifyByIdInterceptor)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
@@ -96,14 +112,24 @@ export class UserController {
   async update(
     @Param('user_id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @Req() req: any,
   ): Promise<User> {
+    console.log(req.entity);
+    const ability = this.caslAbilityFactory.createForEntity();
+    if (!ability.can(Action.Modify, req.user, req.entity)) {
+      throw new ForbiddenException();
+    }
     return this.userService.update(id, updateUserDto);
   }
-
+  @UseInterceptors(ModifyByIdInterceptor)
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':user_id')
-  async remove(@Param('user_id') id: string): Promise<void> {
+  async remove(@Param('user_id') id: string, @Req() req: any): Promise<void> {
+    const ability = this.caslAbilityFactory.createForEntity();
+    if (!ability.can(Action.Modify, req.user, req.entity)) {
+      throw new ForbiddenException();
+    }
     return this.userService.remove(id);
   }
 }
