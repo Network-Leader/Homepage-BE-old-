@@ -45,7 +45,7 @@ export class AuthService {
   async validateUser(student_id: string, pass: string): Promise<any> {
     const user = await this.userRepository.findByStudentID(student_id);
     if (!user) {
-      throw new NotFoundException();
+      throw new NotFoundException("User doesn't exist");
     }
     const match = await bcrypt.compare(pass, user.password);
     if (user && match) {
@@ -85,7 +85,7 @@ export class AuthService {
       userAuthMailDto.email,
     );
     if (existedUser) {
-      throw new ConflictException();
+      throw new ConflictException('User already exists');
     }
     const authCode = this.generateAuthCode();
     this.authRepository.save(
@@ -114,14 +114,14 @@ export class AuthService {
   ): Promise<AuthCodeResponse> {
     const authCode = await this.authRepository.find(userAuthCodeDto.email);
     if (!authCode || userAuthCodeDto.code !== authCode) {
-      throw new BadRequestException();
+      throw new BadRequestException('Authrization code is invalid');
     }
     await this.authRepository.delete(userAuthCodeDto.email);
     return {
       disposable_access_token: this.jwtService.sign({
         email: userAuthCodeDto.email,
       }),
-    }; //객체로 보내기
+    };
   }
 
   private generateAuthCode(): string {

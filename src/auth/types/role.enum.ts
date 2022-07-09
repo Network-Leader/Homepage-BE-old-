@@ -1,6 +1,6 @@
 export enum Role {
   PENDING = 'Pending',
-  UNDERGRADUATE = 'UnerGraduate',
+  UNDERGRADUATE = 'UnderGraduate',
   GRADUATE = 'Graduate',
   GUEST = 'Guest',
   ADMIN = 'Admin',

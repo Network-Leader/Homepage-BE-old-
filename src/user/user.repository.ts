@@ -19,29 +19,28 @@ export class UserRepository {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+    return await this.userModel.find().exec();
   }
 
   async findByEmail(email: string): Promise<User> {
-    return this.userModel.findOne({ email }).lean().exec();
+    return await this.userModel.findOne({ email }).exec();
   }
 
   async findByStudentID(student_id: string): Promise<User> {
-    return this.userModel.findOne({ student_id }).lean().exec();
+    return await this.userModel.findOne({ student_id }).exec();
   }
 
   async findOne(id: string): Promise<User> {
-    return this.userModel.findOne({ id }).lean().exec();
+    return await this.userModel.findOne({ id }).exec();
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    return this.userModel
+    return await this.userModel
       .findOneAndUpdate({ id }, updateUserDto, { new: true })
-      .lean()
       .exec();
   }
 
   async remove(id: string): Promise<any> {
-    return this.userModel.findOneAndRemove({ id }).lean().exec();
+    return await this.userModel.findOneAndRemove({ id }).exec();
   }
 }
