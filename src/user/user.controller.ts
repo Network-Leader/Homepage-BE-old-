@@ -1,4 +1,4 @@
-import { ModifyByIdInterceptor } from './../common/interceptor/modifyById.interceptor';
+import { UserByIdInterceptor } from '../common/interceptors/userById.interceptor';
 import {
   Controller,
   Get,
@@ -33,7 +33,6 @@ import { User } from './entities/user.entity';
 import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { Roles } from 'src/auth/decorator/Roles.decorator';
 import { Role } from 'src/auth/types/role.enum';
-import { Action } from 'src/casl/action.enum';
 
 @ApiTags('User')
 @Controller('users')
@@ -73,7 +72,7 @@ export class UserController {
     @Body() createUserDto: CreateUserDto,
     @Req() req,
   ): Promise<CreateUserResponse> {
-    return this.userService.create(createUserDto, req.user.email);
+    return await this.userService.create(createUserDto, req.user.email);
   }
 
   @ApiOkResponse({
@@ -85,7 +84,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Get('me')
   async findMe(@Request() req): Promise<User> {
-    return req.user; //del도 가능인가?
+    return req.user;
   }
 
   @ApiBearerAuth()
@@ -93,43 +92,50 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Get()
   async findAll(): Promise<User[]> {
-    return this.userService.findAll();
+    return await this.userService.findAll();
   }
 
   @ApiBearerAuth()
+  @UseInterceptors(UserByIdInterceptor)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get(':user_id')
-  async findOne(@Param('user_id') id: string): Promise<User> {
-    return this.userService.findOne(id);
+  async findOne(@Req() req): Promise<User> {
+    return req.entity;
   }
 
-  @UseInterceptors(ModifyByIdInterceptor)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(UserByIdInterceptor)
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Patch(':user_id')
   async update(
     @Param('user_id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @Req() req: any,
   ): Promise<User> {
-    console.log(req.entity);
-    const ability = this.caslAbilityFactory.createForEntity();
-    if (!ability.can(Action.Modify, req.user, req.entity)) {
-      throw new ForbiddenException();
+    const ability = this.caslAbilityFactory.createForUser();
+    if (
+      ability.cannotModifySelf(req.user, req.entity) ||
+      ability.cannotModifyUserRole(req.user, updateUserDto)
+    ) {
+      throw new ForbiddenException(
+        "You can't modify your own role || you can't modify other's entity",
+      );
     }
-    return this.userService.update(id, updateUserDto);
+    return await this.userService.update(id, updateUserDto);
   }
-  @UseInterceptors(ModifyByIdInterceptor)
+
   @ApiBearerAuth()
+  @UseInterceptors(UserByIdInterceptor)
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':user_id')
   async remove(@Param('user_id') id: string, @Req() req: any): Promise<void> {
-    const ability = this.caslAbilityFactory.createForEntity();
-    if (!ability.can(Action.Modify, req.user, req.entity)) {
-      throw new ForbiddenException();
+    const ability = this.caslAbilityFactory.createForUser();
+    if (ability.cannotModifySelf(req.user, req.entity)) {
+      throw new ForbiddenException("You can't modify other's entity");
     }
-    return this.userService.remove(id);
+    await this.userService.remove(id);
   }
 }

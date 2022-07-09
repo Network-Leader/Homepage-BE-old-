@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from './entities/user.entity';
@@ -10,6 +11,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -27,10 +29,10 @@ export class UserService {
       createUserDto.student_id,
     );
     if (existedUser) {
-      throw new ConflictException();
+      throw new ConflictException('User already exists');
     }
     if (createUserDto.email !== email) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Email is not same with verified email');
     }
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,
@@ -49,14 +51,28 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<User> {
-    return await this.userRepository.findOne(id);
+    console.log(id);
+    const user = await this.userRepository.findOne(id);
+    console.log(user);
+    if (!user) {
+      throw new NotFoundException("User doesn't exist with id: " + id);
+    }
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    return await this.userRepository.update(id, updateUserDto);
+    const user = await this.userRepository.update(id, updateUserDto);
+    if (!user) {
+      throw new NotFoundException("User doesn't exist with id: " + id);
+    }
+    return user;
   }
 
-  async remove(id: string): Promise<any> {
-    return await this.userRepository.remove(id);
+  async remove(id: string): Promise<void> {
+    const ret = await this.userRepository.remove(id);
+    console.log(ret);
+    if (!ret) {
+      throw new NotFoundException("User doesn't exist with id: " + id);
+    }
   }
 }

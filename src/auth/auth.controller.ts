@@ -121,10 +121,10 @@ export class AuthController {
     description: 'Validate auth code successfully.',
     type: AuthCodeResponse,
   })
-  @ApiUnauthorizedResponse({
+  @ApiBadRequestResponse({
     description:
       '알맞지 않은 코드를 입력했거나 기존 작성한 이메일과 일치하지 않습니다',
-    type: UnauthorizedException,
+    type: BadRequestException,
   })
   @HttpCode(HttpStatus.OK)
   @Post('/check-code')
