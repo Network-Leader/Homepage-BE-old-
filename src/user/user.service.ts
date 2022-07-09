@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserRepository } from './user.repository';
@@ -30,7 +30,7 @@ export class UserService {
       throw new ConflictException();
     }
     if (createUserDto.email !== email) {
-      throw new BadRequestException();
+      throw new UnauthorizedException();
     }
     createUserDto.password = await bcrypt.hash(
       createUserDto.password,

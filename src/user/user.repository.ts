@@ -4,13 +4,17 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const createdUser = new this.userModel(createUserDto);
+    const uuid = uuidv4();
+    const createIdUser = { ...createUserDto, id: uuid };
+    const createdUser = new this.userModel(createIdUser);
+
     return await createdUser.save();
   }
 
@@ -27,7 +31,7 @@ export class UserRepository {
   }
 
   async findOne(id: string): Promise<User> {
-    return this.userModel.findOne({ _id: id }).lean().exec();
+    return this.userModel.findOne({ id }).lean().exec();
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -38,6 +42,6 @@ export class UserRepository {
   }
 
   async remove(id: string): Promise<any> {
-    return this.userModel.findByIdAndRemove({ _id: id }).lean().exec();
+    return this.userModel.findByIdAndRemove({ id }).lean().exec();
   }
 }
