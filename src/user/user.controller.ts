@@ -33,6 +33,7 @@ import { User } from './entities/user.entity';
 import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { Roles } from 'src/auth/decorator/Roles.decorator';
 import { Role } from 'src/auth/types/role.enum';
+import { RolesGuard } from 'src/auth/guards/Roles.guard';
 
 @ApiTags('User')
 @Controller('users')
@@ -87,6 +88,8 @@ export class UserController {
     return req.user;
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.GRADUATE, Role.UNDERGRADUATE)
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -95,6 +98,8 @@ export class UserController {
     return await this.userService.findAll();
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.GRADUATE, Role.UNDERGRADUATE)
   @ApiBearerAuth()
   @UseInterceptors(UserByIdInterceptor)
   @UseGuards(JwtAuthGuard)
